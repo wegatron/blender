@@ -49,7 +49,7 @@ void main()
   vec4 samp = textureGather(depth_layered_tx, vec3(samp_co, float(layer_id)));
 #else
   vec2 samp_co = vec2(src_px + 1) / vec2(textureSize(depth_tx, 0));
-  vec4 samp = textureGather(depth_tx, samp_co);
+  vec4 samp = textureGather(depth_tx, samp_co); // i, j, i+1, j+1 四个点的深度
 #endif
 
   // 这里保存的是原始数据
@@ -100,7 +100,7 @@ void main()
   }
   finished_tile_counter = 0u;
 
-  ivec2 iter = divide_ceil(imageSize(out_mip_5), ivec2(gl_WorkGroupSize.xy * 2u));
+  ivec2 iter = divide_ceil(imageSize(out_mip_5), ivec2(gl_WorkGroupSize.xy * 2u));// out_mip_6大小是out_mip_5的大小除以2
   ivec2 image_border = imageSize(out_mip_5) - 1;
   for (int y = 0; y < iter.y; y++) {
     for (int x = 0; x < iter.x; x++) {
