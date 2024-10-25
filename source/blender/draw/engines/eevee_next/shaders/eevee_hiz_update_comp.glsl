@@ -43,7 +43,7 @@ void main()
   ivec2 kernel_origin = ivec2(gl_WorkGroupSize.xy * gl_WorkGroupID.xy);
 
   /* Copy level 0. */
-  ivec2 src_px = ivec2(kernel_origin + local_px) * 2;
+  ivec2 src_px = ivec2(kernel_origin + local_px) * 2; // 得到mip0的坐标, 是当前所有线程数量x2
 #ifdef HIZ_LAYER
   vec2 samp_co = vec2(src_px + 1) / vec2(textureSize(depth_layered_tx, 0).xy);
   vec4 samp = textureGather(depth_layered_tx, vec3(samp_co, float(layer_id)));
@@ -52,6 +52,7 @@ void main()
   vec4 samp = textureGather(depth_tx, samp_co);
 #endif
 
+  // 这里保存的是原始数据
   if (update_mip_0) {
     imageStoreFast(out_mip_0, src_px + ivec2(0, 1), samp.xxxx);
     imageStoreFast(out_mip_0, src_px + ivec2(1, 1), samp.yyyy);
@@ -59,6 +60,7 @@ void main()
     imageStoreFast(out_mip_0, src_px + ivec2(0, 0), samp.wwww);
   }
 
+  // 计算第一层，并保存
   /* Level 1. (No load) */
   float max_depth = reduce_max(samp);
   ivec2 dst_px = ivec2(kernel_origin + local_px);
@@ -69,6 +71,7 @@ void main()
   bool active_thread;
   int mask_shift = 1;
 
+// active_thread, 当进入下一层时, 真正的线程数量会减半, 所以需要判断是否是有效线程
 #define downsample_level(out_mip__, lod_) \
   active_thread = all(lessThan(uvec2(local_px), gl_WorkGroupSize.xy >> uint(mask_shift))); \
   barrier(); /* Wait for previous writes to finish. */ \
