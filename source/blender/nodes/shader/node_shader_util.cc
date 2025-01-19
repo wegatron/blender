@@ -312,9 +312,9 @@ void ntreeExecGPUNodes(bNodeTreeExec *exec, GPUMaterial *mat, bNode *output_node
   bNode *node;
   int n;
   bNodeStack *stack;
-  bNodeStack *nsin[MAX_SOCKET];  /* arbitrary... watch this */
+  bNodeStack *nsin[MAX_SOCKET];  /* arbitrary... watch this */ // 每个成员指向stack中的一个元素
   bNodeStack *nsout[MAX_SOCKET]; /* arbitrary... watch this */
-  GPUNodeStack gpuin[MAX_SOCKET + 1], gpuout[MAX_SOCKET + 1];
+  GPUNodeStack gpuin[MAX_SOCKET + 1], gpuout[MAX_SOCKET + 1]; // 和nsin, nsout对应, 添加一个end标记
   bool do_it;
 
   stack = exec->stack;
@@ -342,8 +342,10 @@ void ntreeExecGPUNodes(bNodeTreeExec *exec, GPUMaterial *mat, bNode *output_node
       BLI_assert(!depth_level || node->runtime->tmp_flag >= 0);
       if (node->typeinfo->gpu_fn) {
         node_get_stack(node, stack, nsin, nsout);
+        // 把nsin nsout的值, 和socket的链接关系设置到gpuin gpuout中
         gpu_stack_from_data_list(gpuin, &node->inputs, nsin);
         gpu_stack_from_data_list(gpuout, &node->outputs, nsout);
+        // 执行节点的gpu_fn, 并从gpuout中获取数据, 放回stack
         if (node->typeinfo->gpu_fn(mat, node, &nodeexec->data, gpuin, gpuout)) {
           data_from_gpu_stack_list(&node->outputs, nsout, gpuout);
         }

@@ -65,16 +65,17 @@ enum eGPUNodeTag {
 
 ENUM_OPERATORS(eGPUNodeTag, GPU_NODE_TAG_COMPOSITOR)
 
+// glsl函数调用的节点
 struct GPUNode {
-  GPUNode *next, *prev;
+  GPUNode *next, *prev; //!< Link list into GPUNodeGraph
 
-  const char *name;
+  const char *name; //!< glsl function name
 
   /* Internal flag to mark nodes during pruning */
   eGPUNodeTag tag;
 
-  ListBase inputs;
-  ListBase outputs;
+  ListBase inputs; //!< GPUInput
+  ListBase outputs; //!< GPUOutput
 };
 
 struct GPUNodeLink {

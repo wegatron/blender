@@ -711,6 +711,12 @@ GPUNodeLink *GPU_color_band(GPUMaterial *mat, int size, float *pixels, float *r_
 
 /* Creating Nodes */
 
+/**
+ * @brief GPU_link接收一堆GPUNodeLink可变参数，根据name对应函数参数表将参数连上
+ * @param mat
+ * @param name
+ * @param ... 可变参数均为GPUNodeLink指针
+ */
 bool GPU_link(GPUMaterial *mat, const char *name, ...)
 {
   GPUNodeGraph *graph = gpu_material_node_graph(mat);
@@ -719,15 +725,14 @@ bool GPU_link(GPUMaterial *mat, const char *name, ...)
   GPUNodeLink *link, **linkptr;
   va_list params;
   int i;
-
+  // 根据name在graph->used_libraries中找到对应的GPUFunction glsl函数
   function = gpu_material_library_use_function(graph->used_libraries, name);
   if (!function) {
     fprintf(stderr, "GPU failed to find function %s\n", name);
     return false;
   }
-
-  node = gpu_node_create(name);
-
+  node = gpu_node_create(name); // 创建一个新的GPUNode
+  // 根据GPUNodeLink的信息, 提取输入输出参数
   va_start(params, name);
   for (i = 0; i < function->totparam; i++) {
     if (function->paramqual[i] == FUNCTION_QUAL_OUT) {
@@ -740,9 +745,8 @@ bool GPU_link(GPUMaterial *mat, const char *name, ...)
     }
   }
   va_end(params);
-
+  // 将节点添加到graph
   BLI_addtail(&graph->nodes, node);
-
   return true;
 }
 
@@ -818,6 +822,9 @@ static bool gpu_stack_link_v(GPUMaterial *material,
   return true;
 }
 
+/**
+ * @brief GPU_stack_link接收一堆GPUNodeStack可变参数，根据name对应函数参数表将参数连上
+ */
 bool GPU_stack_link(GPUMaterial *material,
                     const bNode *bnode,
                     const char *name,

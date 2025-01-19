@@ -93,6 +93,7 @@ enum eGPUMaterialFlag {
 
 ENUM_OPERATORS(eGPUMaterialFlag, GPU_MATFLAG_LOOKDEV_HACK);
 
+// blender节点输入输出socket，用于gpu_fn传参
 struct GPUNodeStack {
   eGPUType type;
   float vec[4];
