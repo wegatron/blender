@@ -174,6 +174,7 @@ bNodeTreeExec *ntree_exec_begin(bNodeExecContext *context,
     }
 
     if (node->flag & NODE_MUTED || node->type == NODE_REROUTE) {
+      // 对于被禁用的节点，其输出socket由内部链接的输入来替代
       LISTBASE_FOREACH (bNodeSocket *, sock, &node->outputs) {
         node_init_output_index_muted(sock, &index, node->runtime->internal_links);
       }

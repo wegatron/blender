@@ -1216,6 +1216,7 @@ void ntreeGPUMaterialNodes(bNodeTree *localtree, GPUMaterial *mat)
     }
   }
 
+  // 创建、初始化exec数据, 将localtree中的节点in/out, 设置到exec->stack中
   exec = ntreeShaderBeginExecTree(localtree);
   /* Execute nodes ordered by the number of ShaderToRGB nodes found in their path,
    * so all closures can be properly evaluated. */

@@ -86,7 +86,7 @@ struct NodeEnumDefinition;
 typedef struct bNodeStack {
   float vec[4];
   float min, max;
-  void *data;
+  void *data; // 这里数据要么是Link, 要么是vec
   /** When input has link, tagged before executing. */
   short hasinput;
   /** When output is linked, tagged before executing. */

@@ -317,7 +317,7 @@ void ntreeExecGPUNodes(bNodeTreeExec *exec, GPUMaterial *mat, bNode *output_node
   GPUNodeStack gpuin[MAX_SOCKET + 1], gpuout[MAX_SOCKET + 1]; // 和nsin, nsout对应, 添加一个end标记
   bool do_it;
 
-  stack = exec->stack;
+  stack = exec->stack; // 所有需要执行的节点的输入输出都被flatten 到了 exec 的 stack
 
   for (n = 0, nodeexec = exec->nodeexec; n < exec->totnodes; n++, nodeexec++) {
     node = nodeexec->node;
@@ -341,12 +341,15 @@ void ntreeExecGPUNodes(bNodeTreeExec *exec, GPUMaterial *mat, bNode *output_node
     if (do_it) {
       BLI_assert(!depth_level || node->runtime->tmp_flag >= 0);
       if (node->typeinfo->gpu_fn) {
+        // 将inputs outputs的值, 从stack中取出, 放到nsin nsout中
         node_get_stack(node, stack, nsin, nsout);
-        // 把nsin nsout的值, 和socket的链接关系设置到gpuin gpuout中
+        // 将nsin nsout(NodeStack)转化为gpuin gpuout(GPUNodeStack)
         gpu_stack_from_data_list(gpuin, &node->inputs, nsin);
         gpu_stack_from_data_list(gpuout, &node->outputs, nsout);
-        // 执行节点的gpu_fn, 并从gpuout中获取数据, 放回stack
+        // 执行节点的gpu_fn: 创建shader function name的节点, 进行关联
+        // 参考node_shader_bsdf_diffuse.cc + gpu_shader_material_diffuse.glsl
         if (node->typeinfo->gpu_fn(mat, node, &nodeexec->data, gpuin, gpuout)) {
+          // 将节点的输出gpuout设置到nsout中
           data_from_gpu_stack_list(&node->outputs, nsout, gpuout);
         }
       }
