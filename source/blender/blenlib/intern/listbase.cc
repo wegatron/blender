@@ -107,6 +107,9 @@ void BLI_addhead(ListBase *listbase, void *vlink)
   listbase->first = link;
 }
 
+/**
+ * @brief 将vlink添加到listbase的尾部
+ */
 void BLI_addtail(ListBase *listbase, void *vlink)
 {
   Link *link = static_cast<Link *>(vlink);

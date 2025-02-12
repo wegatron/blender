@@ -70,7 +70,7 @@ static void gpu_node_input_link(GPUNode *node, GPUNodeLink *link, const eGPUType
   const char *name;
 
   if (link->link_type == GPU_NODE_LINK_OUTPUT) {
-    outnode = link->output->node;
+    outnode = link->output->node; // 这里是outnode是指生成output的node
     name = outnode->name;
     input = static_cast<GPUInput *>(outnode->inputs.first);
 
@@ -243,6 +243,9 @@ static void gpu_node_input_socket(
   }
 }
 
+/**
+** \brief Create a new node and add it to the node graph.
+*/
 static void gpu_node_output(GPUNode *node, const eGPUType type, GPUNodeLink **link)
 {
   GPUOutput *output = MEM_cnew<GPUOutput>("GPUOutput");
@@ -769,10 +772,11 @@ static bool gpu_stack_link_v(GPUMaterial *material,
     return false;
   }
 
-  node = gpu_node_create(name);
+  node = gpu_node_create(name); // 根据名字创建一个新的GPUNode
   totin = 0;
   totout = 0;
 
+  // 根据
   if (in) {
     for (i = 0; !in[i].end; i++) {
       if (in[i].type != GPU_NONE) {
@@ -782,6 +786,7 @@ static bool gpu_stack_link_v(GPUMaterial *material,
     }
   }
 
+  // 根据输出stack的信息, 创建GPUOutput, 并将其添加到node的outputs中
   if (out) {
     for (i = 0; !out[i].end; i++) {
       if (out[i].type != GPU_NONE) {
