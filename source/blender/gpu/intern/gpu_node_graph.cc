@@ -231,14 +231,14 @@ static void gpu_node_input_socket(
     GPUMaterial *material, const bNode *bnode, GPUNode *node, GPUNodeStack *sock, const int index)
 {
   if (sock->link) {
-    gpu_node_input_link(node, sock->link, sock->type);
+    gpu_node_input_link(node, sock->link, sock->type); // 如果插槽已经有链接，则将该链接传递给 GPU 节点
   }
-  else if ((material != nullptr) &&
+  else if ((material != nullptr) && // 如果插槽没有链接，但是有材质, 则尝试该插槽链接到材质的 uniform buffer(创建了一个新的link)
            (gpu_uniformbuffer_link(material, bnode, sock, index, SOCK_IN) != nullptr))
   {
     gpu_node_input_link(node, sock->link, sock->type);
   }
-  else {
+  else { // 以上条件都不满足，则将插槽的常量值传递给 GPU 节点
     gpu_node_input_link(node, GPU_constant(sock->vec), sock->type);
   }
 }
@@ -776,10 +776,11 @@ static bool gpu_stack_link_v(GPUMaterial *material,
   totin = 0;
   totout = 0;
 
-  // 根据
+  // 根据stack的信息, 创建GPUInput, 并将其添加到node的inputs中
   if (in) {
     for (i = 0; !in[i].end; i++) {
       if (in[i].type != GPU_NONE) {
+        // 如果对应的slot没有链接, 则尝试将其链接到材质的uniform buffer, 如果还不行, 则将其常量值传递给GPU节点
         gpu_node_input_socket(material, bnode, node, &in[i], i);
         totin++;
       }
@@ -796,9 +797,10 @@ static bool gpu_stack_link_v(GPUMaterial *material,
     }
   }
 
+  // 处理其他剩余的参数, 可能是其他的一些输入或输出, 比如从全局变量中获取的输入或输出
   for (i = 0; i < function->totparam; i++) {
     if (function->paramqual[i] == FUNCTION_QUAL_OUT) {
-      if (totout == 0) {
+      if (totout == 0) { // 过滤stack out参数
         linkptr = va_arg(params, GPUNodeLink **);
         gpu_node_output(node, function->paramtype[i], linkptr);
       }
@@ -807,7 +809,7 @@ static bool gpu_stack_link_v(GPUMaterial *material,
       }
     }
     else {
-      if (totin == 0) {
+      if (totin == 0) { // 过滤stack in参数
         link = va_arg(params, GPUNodeLink *);
         if (link->socket) {
           gpu_node_input_socket(nullptr, nullptr, node, link->socket, -1);
